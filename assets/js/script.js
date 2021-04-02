@@ -59,8 +59,22 @@ var createTaskEl = function (taskDataObj) {
     var taskActionsEl = createTaskActions(taskIdCounter);
     listItemEl.appendChild(taskActionsEl);
 
-    // add entire list item to list
-    tasksToDoEl.appendChild(listItemEl);
+    switch (taskDataObj.status) {
+        case "to do":
+            taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 0;
+            tasksToDoEl.append(listItemEl);
+            break;
+        case "in progress":
+            taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 1;
+            tasksInProgressEl.append(listItemEl);
+            break;
+        case "completed":
+            taskActionsEl.querySelector("select[name='status-change']").selectedIndex = 2;
+            tasksCompletedEl.append(listItemEl);
+            break;
+        default:
+            console.log("Something went wrong!");
+    }
 
     taskDataObj.id = taskIdCounter;
 
@@ -141,6 +155,9 @@ var taskStatusChangeHandler = function (event) {
     // find the parent task item element based on the id
     var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
 
+    // convert value to lower case
+    var statusValue = event.target.value.toLowerCase();
+
     if (statusValue === "to do") {
         tasksToDoEl.appendChild(taskSelected);
     }
@@ -158,7 +175,7 @@ var taskStatusChangeHandler = function (event) {
         }
     }
 
-    localStorage.setItem("tasks", tasks);
+    saveTasks();
 };
 
 var editTask = function (taskId) {
@@ -195,7 +212,7 @@ var deleteTask = function (taskId) {
     // reassign tasks array to be the same as updatedTaskArr
     tasks = updatedTaskArr;
 
-    localStorage.setItem("tasks", tasks);
+    saveTasks();
 };
 
 var completeEditTask = function (taskName, taskType, taskId) {
@@ -218,7 +235,7 @@ var completeEditTask = function (taskName, taskType, taskId) {
     formEl.removeAttribute("data-task-id");
     document.querySelector("#save-task").textContent = "Add Task";
 
-    localStorage.setItem("tasks", tasks);
+    saveTasks();
 };
 
 var saveTasks = function () {
@@ -234,7 +251,7 @@ var loadTasks = function () {
 
     savedTasks = JSON.parse(savedTasks);
 
-    for (var i = 0; i < tasks.length; i++) {
+    for (var i = 0; i < savedTasks.length; i++) {
         createTaskEl(savedTasks[i]);
     }
 };
